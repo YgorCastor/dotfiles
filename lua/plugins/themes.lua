@@ -36,9 +36,15 @@ return {
   },
   { "bluz71/vim-moonfly-colors", name = "moonfly", lazy = false, priority = 1000 },
   {
+    "0xstepit/flow.nvim",
+    lazy = false,
+    priority = 1000,
+    opts = {},
+  },
+  {
     "LazyVim/LazyVim",
     opts = {
-      colorscheme = "moonfly",
+      colorscheme = "flow",
     },
   },
 }

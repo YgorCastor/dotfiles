@@ -8,11 +8,20 @@ return {
       local elixirls = require("elixir.elixirls")
 
       elixir.setup({
-        nextls = { enable = true },
-        credo = { enable = false },
-        elixirls = {
+        nextls = {
           enable = true,
-          tag = "v0.22.0",
+          init_options = {
+            mix_env = "dev",
+            experimental = {
+              completions = {
+                enable = true,
+              },
+            },
+          },
+        },
+        elixirls = {
+          enable = false,
+          tag = "v0.22.1",
           settings = elixirls.settings({
             dialyzerEnabled = true,
             suggestSpecs = false,
