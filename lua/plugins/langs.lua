@@ -1,80 +1,70 @@
 return {
-  -- {
-  --   "elixir-tools/elixir-tools.nvim",
-  --   version = "*",
-  --   event = { "BufReadPre", "BufNewFile" },
-  --   config = function()
-  --     local elixir = require("elixir")
-  --     local elixirls = require("elixir.elixirls")
-  --
-  --     elixir.setup({
-  --       nextls = {
-  --         enable = true,
-  --         init_options = {
-  --           mix_env = "dev",
-  --           experimental = {
-  --             completions = {
-  --               enable = true,
-  --             },
-  --           },
-  --         },
-  --       },
-  --       elixirls = {
-  --         enable = false,
-  --         tag = "v0.22.1",
-  --         settings = elixirls.settings({
-  --           dialyzerEnabled = true,
-  --           suggestSpecs = false,
-  --           enableTestLenses = false,
-  --         }),
-  --         on_attach = function(client, bufnr)
-  --           vim.keymap.set("n", "<space>fp", ":ElixirFromPipe<cr>", { buffer = true, noremap = true })
-  --           vim.keymap.set("n", "<space>tp", ":ElixirToPipe<cr>", { buffer = true, noremap = true })
-  --           vim.keymap.set("v", "<space>em", ":ElixirExpandMacro<cr>", { buffer = true, noremap = true })
-  --         end,
-  --       },
-  --     })
-  --   end,
-  --   dependencies = {
-  --     "nvim-lua/plenary.nvim",
-  --   },
-  -- },
-  -- {
-  --   "nvim-neotest/neotest",
-  --   optional = true,
-  --   dependencies = {
-  --     "jfpedroza/neotest-elixir",
-  --   },
-  --   opts = {
-  --     adapters = {
-  --       ["neotest-elixir"] = {},
-  --     },
-  --   },
-  -- },
-  -- {
-  --   "nvimtools/none-ls.nvim",
-  --   optional = true,
-  --   opts = function(_, opts)
-  --     if vim.fn.executable("credo") == 0 then
-  --       return
-  --     end
-  --     local nls = require("null-ls")
-  --     opts.sources = vim.list_extend(opts.sources or {}, {
-  --       nls.builtins.diagnostics.credo,
-  --     })
-  --   end,
-  -- },
+  {
+    "nvim-neotest/neotest",
+    optional = true,
+    dependencies = {
+      "jfpedroza/neotest-elixir",
+    },
+    opts = {
+      adapters = {
+        ["neotest-elixir"] = {},
+      },
+    },
+  },
   {
     "mfussenegger/nvim-lint",
     optional = true,
     opts = function(_, opts)
-      if vim.fn.executable("credo") == 0 then
-        return
-      end
       opts.linters_by_ft = {
         elixir = { "credo" },
       }
+
+      opts.linters = {
+        credo = {
+          condition = function(ctx)
+            return vim.fs.find({ ".credo.exs" }, { path = ctx.filename, upward = true })[1]
+          end,
+        },
+      }
     end,
+  },
+  {
+    "nvimtools/none-ls.nvim",
+    opts = function(_, opts)
+      local nls = require("null-ls")
+      opts.sources = vim.list_extend(opts.sources or {}, {
+        nls.builtins.formatting.mix.with({
+          cwd = function()
+            -- Use Neovim's current working directory
+            return vim.fn.getcwd()
+          end,
+          extra_args = function()
+            local cwd = vim.fn.getcwd()
+            local formatter_path = cwd .. "/.formatter.exs"
+            vim.notify(formatter_path)
+
+            if vim.fn.filereadable(formatter_path) == 1 then
+              return { "--dot-formatter", formatter_path }
+            end
+            return {}
+          end,
+        }),
+      })
+    end,
+  },
+  {
+    "neovim/nvim-lspconfig",
+    opts = {
+      servers = {
+        lexical = {
+          on_attach = function(client, bufnr)
+            -- Disable Lexical’s formatting capabilities
+            client.server_capabilities.documentFormattingProvider = false
+            client.server_capabilities.documentRangeFormattingProvider = false
+          end,
+        },
+      },
+    },
   },
   {
     "nvim-treesitter/nvim-treesitter",
@@ -84,6 +74,7 @@ return {
         "erlang",
         "elixir",
         "eex",
+        "graphql",
         "go",
         "heex",
         "hcl",

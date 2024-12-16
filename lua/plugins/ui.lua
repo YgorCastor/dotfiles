@@ -9,18 +9,8 @@ return {
     end,
   },
   {
-    "imNel/monorepo.nvim",
-    config = function()
-      require("monorepo").setup()
-
-      vim.keymap.set("n", "<leader>mr", function()
-        require("telescope").extensions.monorepo.monorepo()
-      end)
-      vim.keymap.set("n", "<leader>mrt", function()
-        require("monorepo").toggle_project()
-      end)
-    end,
-    dependencies = { "nvim-telescope/telescope.nvim", "nvim-lua/plenary.nvim" },
+    "willothy/wezterm.nvim",
+    config = true,
   },
   {
     "mistricky/codesnap.nvim",
